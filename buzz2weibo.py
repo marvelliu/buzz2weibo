@@ -7,13 +7,15 @@
 
 from config import *
 from urllib2 import urlopen, URLError
-from json import load
+from simplejson import load
 from activity import *
 from weibopy.auth import OAuthHandler
 from weibopy.api import API
 from weibopy.error import WeibopError
 from time import sleep
 import os, errno, sys
+from formaturl import changeurl
+import re
 
 WEIBO_APP_KEY = '3127127763'
 WEIBO_APP_SECRET = '21cc35f55fc8fe73b73162964c0bb415'
@@ -22,9 +24,35 @@ BUZZ_API_KEY = 'AIzaSyAJ1zTsHUb12l1LCJbB20Fxsh8dz3zWt1o'
 # 运行一次最多同步几条。缺省3。连续同步太多会被休息的
 WEIBO_MAX_SYNC_COUNT = 3
 
+def formaturl(content):
+
+    urlreg = "([/w-]+/.)+[/w-]+.([^a-z])(/[/w- ./?%&=]*)?|[a-zA-Z0-9/-/.][/w-]+.([^a-z])(/[/w- ./?%&=]*)?" 
+    
+    urlfinders = [
+            re.compile("([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}|(((news|telnet|nttp|file|http|ftp|https)://)|(www|ftp)[-A-Za-z0-9]*\\.)[-A-Za-z0-9\\.]+)(:[0-9]*)?/[-A-Za-z0-9_\\$\\.\\+\\!\\*\\(\\),;:@&=\\?/~\\#\\%]*[^]'\\.}>\\),\\\"]"),
+            re.compile("([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}|(((news|telnet|nttp|file|http|ftp|https)://)|(www|ftp)[-A-Za-z0-9]*\\.)[-A-Za-z0-9\\.]+)(:[0-9]*)?"),
+            re.compile("~/(~/|/|\\./)([-A-Za-z0-9_\\$\\.\\+\\!\\*\\(\\),;:@&=\\?/~\\#\\%]|\\\\)+"),
+            re.compile("'\\<((mailto:)|)[-A-Za-z0-9\\.]+@[-A-Za-z0-9\\.]+"),
+                            ]
+    for urlfinder in urlfinders:
+        a=urlfinder.finditer(content)
+        for i in a:
+            u1 = i.group()
+            u1 = u1.strip()
+            u2 = changeurl(u1) 
+            content = content.replace(u1,u2)
+    return content
+
+
+
+
+
+
+
 def post2weibo(api, act):
     
     message = act.content + ' ' + act.link
+    message = formaturl(message)
     if APPEND_SHARE_FROM_BUZZ_LINK:
         message += u' //转发自%s'.encode('utf-8') % act.origin_link
 

@@ -8,7 +8,7 @@
 from weibopy.auth import OAuthHandler
 from weibopy.api import API
 from urllib2 import urlopen, URLError, HTTPError
-from json import load
+from simplejson import load
 import sys, os
 import codecs
 
