@@ -5,12 +5,12 @@ import os, errno, sys
 blackurls = ["t.co", "bit.ly","goo.gl","tinyurl.com", "is.gd"]
 
 def changeurl(url):
-    global whiteurls
+    global blackurls
     found = 0
-    for whiteurl in whiteurls:
+    for whiteurl in blackurls:
         if url.find(whiteurl)>=0:
             found = 1
-    if found = 0:
+    if found == 0:
         return url
     p = url.find("://")
     if p <0:
@@ -18,8 +18,8 @@ def changeurl(url):
     return url[p+3:]
 
 def shortenurlfromshorl(url):
-    global whiteurls
-    for whiteurl in whiteurls:
+    global blackurls
+    for whiteurl in blackurls:
         if url.find(whiteurl)>=0:
             return url
     url1="http://shorl.com/create.php?url="+url+"&go=Shorlify!"
